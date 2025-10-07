@@ -1,40 +1,32 @@
-import { createContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { createContext, useState } from "react";
+import { login, register } from "../api/api";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
 
-    // Load user from localStorage on mount
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) setUser(JSON.parse(storedUser));
-    }, []);
+    const loginUser = async (email, password) => {
+        const { data } = await login({ email, password });
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("token", data.token);
+    };
 
-    const login = async (email, password) => {
-        try {
-            const { data } = await axios.post("http://localhost:5000/api/auth/login", { email, password });
-            setUser(data.user);
-            localStorage.setItem("user", JSON.stringify(data.user));
-            // Redirect based on role
-            if (data.user.role === "admin") navigate("/admin/dashboard");
-            else navigate("/customer/dashboard");
-        } catch (err) {
-            throw err.response?.data?.message || "Login failed";
-        }
+    const registerUser = async (userData) => {
+        const { data } = await register(userData);
+        setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("token", data.token);
     };
 
     const logout = () => {
         setUser(null);
-        localStorage.removeItem("user");
-        navigate("/login");
+        localStorage.clear();
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, loginUser, registerUser, logout }}>
             {children}
         </AuthContext.Provider>
     );
