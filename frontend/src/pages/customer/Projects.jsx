@@ -42,6 +42,11 @@ export default function Projects() {
                                 key={project._id}
                                 className="p-4 border rounded shadow-sm hover:shadow-md transition"
                             >
+                                <img
+                                    src={project.image}
+                                    alt={project.name}
+                                    className="w-full h-40 object-cover mb-2"
+                                />
                                 <h3 className="text-lg font-bold">{project.name}</h3>
                                 <p>
                                     <strong>Area:</strong> {project.area}
