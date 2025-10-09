@@ -73,3 +73,14 @@ export const deleteEnquiry = async (req, res) => {
     res.status(500).json({ message: "Error deleting enquiry", error: error.message });
   }
 };
+
+
+export const getMyEnquiries = async (req, res) => {
+  try {
+    const enquiries = await Enquiry.find({ customer: req.user._id })
+      .populate("project", "name area status"); // Only project info needed
+    res.status(200).json(enquiries);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching your enquiries", error: error.message });
+  }
+};

@@ -22,8 +22,13 @@ const projectSchema = new mongoose.Schema(
     features: {
       type: [String], 
     },
+
     priceRange: {
       type: String, 
+    },
+
+    location: {
+      type: String,
     },
     image: {
       type: String, 

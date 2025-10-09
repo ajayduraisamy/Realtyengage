@@ -1,6 +1,7 @@
 // src/layouts/CustomerLayout.jsx
 import { Outlet } from "react-router-dom";
 import CustomerNavbar from "../components/CustomerNavbar";
+import Footer from "../components/Footer";
 
 export default function CustomerLayout() {
     return (
@@ -12,6 +13,7 @@ export default function CustomerLayout() {
             <main className="flex-1 p-6 mt-4">
                 <Outlet />  {/* child pages render here */}
             </main>
+            <Footer />
         </div>
     );
 }

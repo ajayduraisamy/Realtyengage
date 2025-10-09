@@ -36,6 +36,8 @@ export default function Login() {
     const handleGoogleLoginSuccess = async (credentialResponse) => {
         try {
             const decoded = jwtDecode(credentialResponse.credential);
+
+            // Send the decoded info to your backend
             const res = await axios.post(
                 "http://localhost:5000/api/auth/google-login",
                 {
@@ -44,15 +46,22 @@ export default function Login() {
                 }
             );
 
+            // Save token and role
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("role", res.data.role);
 
-            navigate("/customer/home");
+            // Redirect based on role
+            if (res.data.role === "admin") {
+                navigate("/admin/dashboard");
+            } else {
+                navigate("/customer/home");
+            }
         } catch (err) {
             console.error("Google login failed:", err);
             setError("Google login failed. Please try again.");
         }
     };
+
 
     const handleGoogleError = () => {
         setError("Google Sign-In failed. Please try again.");

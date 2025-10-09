@@ -1,5 +1,6 @@
 // src/App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // <-- import Toaster
 
 // Layouts
 import AdminLayout from "./layouts/AdminLayout";
@@ -19,6 +20,8 @@ import Projects from "./pages/customer/Projects";
 import MyEnquiries from "./pages/customer/MyEnquiries";
 import MyPayments from "./pages/customer/MyPayments";
 import SupportForm from "./pages/customer/SupportForm";
+import Enquery from "./pages/customer/Enquery";
+import Profile from "./pages/customer/Profile";
 
 // Auth Pages
 import Login from "./pages/Login";
@@ -27,7 +30,7 @@ import Register from "./pages/Register";
 // Simple auth check (token + role)
 const ProtectedRoute = ({ children, role }) => {
   const token = localStorage.getItem("token");
-  const userRole = localStorage.getItem("role"); // save role at login
+  const userRole = localStorage.getItem("role");
   if (!token) return <Navigate to="/login" />;
   if (role && role !== userRole) return <Navigate to={`/${userRole}`} />;
   return children;
@@ -36,6 +39,15 @@ const ProtectedRoute = ({ children, role }) => {
 export default function App() {
   return (
     <Router>
+      {/* ✅ Add Toaster here at top level */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: { background: "#333", color: "#fff" },
+        }}
+      />
+
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<Login />} />
@@ -69,9 +81,11 @@ export default function App() {
         >
           <Route path="home" element={<Home />} />
           <Route path="projects" element={<Projects />} />
+          <Route path="enquery" element={<Enquery />} />
           <Route path="enquiries" element={<MyEnquiries />} />
           <Route path="payments" element={<MyPayments />} />
           <Route path="support" element={<SupportForm />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         {/* Default route */}

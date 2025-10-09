@@ -1,5 +1,5 @@
 import { useState } from "react";
-import API from "../../api/api"; // your axios instance
+import API from "../../api/api";
 
 export default function SupportForm() {
     const [name, setName] = useState("");
@@ -27,6 +27,7 @@ export default function SupportForm() {
             );
 
             setSuccess("Support request submitted successfully!");
+            
             setName("");
             setEmail("");
             setNumber("");
@@ -41,12 +42,14 @@ export default function SupportForm() {
     };
 
     return (
-       
-            <div className="p-6 max-w-md w-full bg-white rounded shadow-md">
-                <h2 className="text-2xl font-bold mb-4">Submit Support Request</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-900 dark:to-gray-800 p-4">
+            <div className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 transition-colors duration-300">
+                <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">
+                    Submit Support Request
+                </h2>
 
-                {error && <p className="text-red-500 mb-2">{error}</p>}
-                {success && <p className="text-green-500 mb-2">{success}</p>}
+                {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+                {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
@@ -55,7 +58,7 @@ export default function SupportForm() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     />
 
                     <input
@@ -64,7 +67,7 @@ export default function SupportForm() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     />
 
                     <input
@@ -73,16 +76,16 @@ export default function SupportForm() {
                         value={number}
                         onChange={(e) => setNumber(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     />
 
                     <select
                         value={requestType}
                         onChange={(e) => setRequestType(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     >
-                        <option value="">Select request type</option>
+                        <option value="">Select Request Type</option>
                         <option value="Feedback">Feedback</option>
                         <option value="Grievance">Grievance</option>
                         <option value="Suggestion">Suggestion</option>
@@ -94,7 +97,7 @@ export default function SupportForm() {
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     />
 
                     <textarea
@@ -102,19 +105,19 @@ export default function SupportForm() {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         required
-                        className="w-full border p-2 rounded"
                         rows="5"
+                        className="w-full p-3 rounded-lg border-2 border-purple-400 dark:border-purple-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all duration-300"
                     />
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-900 text-white p-2 rounded hover:bg-blue-800 disabled:opacity-50"
+                        className="w-full py-3 rounded-xl font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-700 dark:to-pink-700 hover:from-pink-500 hover:to-purple-500 dark:hover:from-pink-600 dark:hover:to-purple-600 transition-all duration-300 disabled:opacity-60"
                     >
                         {loading ? "Submitting..." : "Submit"}
                     </button>
                 </form>
             </div>
-      
+        </div>
     );
 }

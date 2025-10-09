@@ -2,6 +2,7 @@ import express from "express";
 import {
   createEnquiry,
   getEnquiries,
+  getMyEnquiries,
   getEnquiryById,
   updateEnquiryStatus,
   deleteEnquiry,
@@ -11,6 +12,7 @@ import { protect, admin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/my", protect, getMyEnquiries);
 // Customer creates enquiry
 router.post("/", protect, createEnquiry);
 

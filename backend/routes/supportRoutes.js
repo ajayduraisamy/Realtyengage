@@ -7,7 +7,7 @@ import {
   deleteSupport,
 } from "../controllers/supportController.js";
 
-import { protect, admin } from "../middlewares/authMiddleware.js";
+import { protect, admin } from "../middlewares/authMiddleware.js"; 
 
 const router = express.Router();
 

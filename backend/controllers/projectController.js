@@ -5,7 +5,7 @@ export const createProject = async (req, res) => {
   try {
     const project = new Project({
       ...req.body,
-      createdBy: req.user._id, // admin who created
+      createdBy: req.user._id, 
     });
 
     const savedProject = await project.save();
