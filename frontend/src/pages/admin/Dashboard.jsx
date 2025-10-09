@@ -50,7 +50,7 @@ export default function Dashboard() {
                 <DashboardCard title="Total Projects" value={stats.totalProjects} color="from-green-400 to-emerald-500" />
                 <DashboardCard title="Total Enquiries" value={stats.totalEnquiries} color="from-purple-400 to-indigo-500" />
                 <DashboardCard title="Total Payments" value={stats.totalPayments} color="from-pink-400 to-rose-500" />
-                <DashboardCard title="Total Revenue" value={`$${stats.totalRevenue}`} color="from-yellow-400 to-orange-500" />
+                <DashboardCard title="Total Revenue" value={`Rs.${stats.totalRevenue}`} color="from-yellow-400 to-orange-500" />
                 <DashboardCard title="Total Support Requests" value={stats.totalSupport} color="from-red-400 to-pink-500" />
             </div>
         </div>

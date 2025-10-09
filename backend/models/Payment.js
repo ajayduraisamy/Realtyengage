@@ -1,49 +1,15 @@
 import mongoose from "mongoose";
 
-const paymentSchema = new mongoose.Schema(
-  {
-    customer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    name: {
-      type: String,
-      required: [true, "Customer name is required"],
-    },
-    email: {
-      type: String,
-      required: [true, "Customer email is required"],
-    },
-    number: {
-      type: String,
-      required: [true, "Customer phone number is required"],
-    },
-    project: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
-      required: true,
-    },
-    amount: {
-      type: Number,
-      required: [true, "Payment amount is required"],
-    },
-    method: {
-      type: String,
-      enum: ["Card", "Bank", "UPI", "Cash"], 
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ["pending", "completed", "failed"],
-      default: "pending",
-    },
-    paymentDate: {
-      type: Date,
-      default: Date.now,
-    },
-  },
-  { timestamps: true }
-);
+const paymentSchema = new mongoose.Schema({
+  customer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  project: { type: mongoose.Schema.Types.ObjectId, ref: "Project", required: true },
+  plan: { type: String, required: true }, // e.g., "10k/month"
+  totalAmount: { type: Number, required: true },
+  paidAmount: { type: Number, default: 0 },
+  pendingAmount: { type: Number, required: true },
+  paymentMethod: { type: String, enum: ["card", "upi"], required: true },
+  status: { type: String, enum: ["pending", "partial", "paid"], default: "pending" },
+  month: { type: Number, default: 0 }, // Number of months paid
+}, { timestamps: true });
 
-const Payment = mongoose.model("Payment", paymentSchema);
-export default Payment;
+export default mongoose.model("Payment", paymentSchema);

@@ -1,8 +1,8 @@
-import User from "../models/User.js";
-import Project from "../models/Project.js";
 import Enquiry from "../models/Enquiry.js";
 import Payment from "../models/Payment.js";
+import Project from "../models/Project.js";
 import Support from "../models/Support.js";
+import User from "../models/User.js";
 
 // @desc    Get dashboard stats (Admin only)
 export const getDashboardStats = async (req, res) => {
@@ -17,9 +17,9 @@ export const getDashboardStats = async (req, res) => {
     const totalEnquiries = await Enquiry.countDocuments();
 
     // Total payments and revenue
-    const payments = await Payment.find();
-    const totalPayments = payments.length;
-    const totalRevenue = payments.reduce((sum, p) => sum + (p.status === "completed" ? p.amount : 0), 0);
+   const payments = await Payment.find();
+const totalPayments = payments.length;
+const totalRevenue = payments.reduce((sum, p) => sum + p.paidAmount, 0);
 
     // Total support requests
     const totalSupport = await Support.countDocuments();

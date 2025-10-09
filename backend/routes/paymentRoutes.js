@@ -1,29 +1,22 @@
 import express from "express";
-import {
-  createPayment,
-  getAllPayments,
-  getPaymentById,
-  updatePaymentStatus,
-  deletePayment,
-} from "../controllers/paymentController.js";
-
-import { protect, admin } from "../middlewares/authMiddleware.js";
+import { createPayment, getPayments, updatePayment, payMonthly, getMyPayments } from "../controllers/paymentController.js";
+import { protect, admin } from "../middlewares/authMiddleware.js"; 
 
 const router = express.Router();
 
-// Customer: create payment
+// ================= User Routes =================
+
 router.post("/", protect, createPayment);
 
-// Admin: get all payments
-router.get("/", protect, admin, getAllPayments);
+router.get("/my", protect, getMyPayments);
+// User makes monthly payment
+router.put("/pay-monthly", protect, payMonthly);
 
-// Admin or Owner: get single payment
-router.get("/:id", protect, getPaymentById);
+// ================= Admin Routes =================
+// Admin fetch all payments
+router.get("/admin", protect, admin, getPayments);
 
-// Admin: update payment status
-router.put("/:id/status", protect, admin, updatePaymentStatus);
-
-// Admin: delete payment
-router.delete("/:id", protect, admin, deletePayment);
+// Admin updates payment (e.g., mark EMI paid)
+router.put("/:id", protect, admin, updatePayment);
 
 export default router;

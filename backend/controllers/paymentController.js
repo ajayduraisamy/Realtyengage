@@ -1,74 +1,115 @@
 import Payment from "../models/Payment.js";
+import Project from "../models/Project.js";
 
-// @desc    Create a new payment (Customer)
+// CREATE INITIAL PAYMENT (when user selects a plan)
 export const createPayment = async (req, res) => {
   try {
-    const payment = new Payment({
-      ...req.body,
+    const { projectId, plan, paidAmount = 0, paymentMethod } = req.body;
+
+    const project = await Project.findById(projectId);
+    if (!project) return res.status(404).json({ message: "Project not found" });
+
+    const totalAmount = Number(project.priceRange.replace(/[^0-9]/g, ""));
+    const pendingAmount = totalAmount - paidAmount;
+
+    const status = paidAmount === 0 ? "pending" : (pendingAmount === 0 ? "paid" : "partial");
+
+    const payment = await Payment.create({
       customer: req.user._id,
+      project: projectId,
+      plan,
+      totalAmount,
+      paidAmount,
+      pendingAmount,
+      paymentMethod,
+      status,
+      month: paidAmount > 0 ? 1 : 0
     });
 
-    const savedPayment = await payment.save();
-    res.status(201).json(savedPayment);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating payment", error: error.message });
+    res.status(201).json(payment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @desc    Get all payments (Admin only)
-export const getAllPayments = async (req, res) => {
+// GET ALL PAYMENTS (Admin)
+export const getPayments = async (req, res) => {
   try {
     const payments = await Payment.find()
-      .populate("customer", "name email number")
-      .populate("project", "name area status");
-    res.status(200).json(payments);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching payments", error: error.message });
+      .populate("customer", "name email")
+      .populate("project", "name priceRange");
+    res.json(payments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @desc    Get single payment by ID (Admin or Owner)
-export const getPaymentById = async (req, res) => {
+// UPDATE PAYMENT (Admin marks EMI or adjusts payment)
+export const updatePayment = async (req, res) => {
   try {
-    const payment = await Payment.findById(req.params.id)
-      .populate("customer", "name email number")
-      .populate("project", "name area status");
+    const { paidAmount } = req.body;
 
-    if (!payment) return res.status(404).json({ message: "Payment not found" });
-
-    if (req.user.role !== "admin" && payment.customer.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to view this payment" });
-    }
-
-    res.status(200).json(payment);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching payment", error: error.message });
-  }
-};
-
-// @desc    Update payment status (Admin only)
-export const updatePaymentStatus = async (req, res) => {
-  try {
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ message: "Payment not found" });
 
-    payment.status = req.body.status || payment.status;
+    payment.paidAmount += paidAmount;
+    if (payment.paidAmount > payment.totalAmount) payment.paidAmount = payment.totalAmount;
+
+    payment.pendingAmount = payment.totalAmount - payment.paidAmount;
+    payment.status = payment.pendingAmount === 0 ? "paid" : "partial";
+    if (payment.pendingAmount > 0) payment.month += 1;
+
     await payment.save();
 
-    res.status(200).json(payment);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating payment", error: error.message });
+    res.json(payment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
-// @desc    Delete payment (Admin only)
-export const deletePayment = async (req, res) => {
+// USER MAKES MONTHLY PAYMENT
+export const payMonthly = async (req, res) => {
   try {
-    const deletedPayment = await Payment.findByIdAndDelete(req.params.id);
-    if (!deletedPayment) return res.status(404).json({ message: "Payment not found" });
+    const { paymentId, amount, paymentMethod } = req.body;
 
-    res.status(200).json({ message: "Payment deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting payment", error: error.message });
+    if (!amount || amount <= 0) return res.status(400).json({ message: "Invalid payment amount" });
+
+    const payment = await Payment.findById(paymentId);
+    if (!payment) return res.status(404).json({ message: "Payment not found" });
+
+    payment.paidAmount += amount;
+    if (payment.paidAmount > payment.totalAmount) payment.paidAmount = payment.totalAmount;
+
+    payment.pendingAmount = payment.totalAmount - payment.paidAmount;
+    payment.status = payment.pendingAmount === 0 ? "paid" : "partial";
+
+    // Increment month only if payment is partial
+    if (payment.pendingAmount > 0) payment.month += 1;
+
+    payment.paymentMethod = paymentMethod;
+
+    await payment.save();
+
+    res.json(payment);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// GET payments of the logged-in user
+export const getMyPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find({ customer: req.user._id })
+      .populate("project", "name priceRange")
+      .sort({ createdAt: -1 });
+
+    res.json(payments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
   }
 };

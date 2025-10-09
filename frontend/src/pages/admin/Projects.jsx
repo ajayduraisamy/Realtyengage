@@ -251,7 +251,7 @@ export default function Projects() {
                                 <input
                                     type="text"
                                     name="priceRange"
-                                    placeholder="e.g., Rs.500K - 800K"
+                                    placeholder="e.g. Rs.500000"
                                     value={formData.priceRange}
                                     onChange={handleChange}
                                     className="w-full p-3 border-0 bg-blue-50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-blue-900"

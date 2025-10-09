@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import API from "../../api/api"; // axios instance
+import API from "../../api/api";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
+
 export default function Projects() {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedProject, setSelectedProject] = useState(null); // For EMI modal
+
+    // Modals & payment state
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [selectedPlan, setSelectedPlan] = useState(0);
+    const [paymentMethod, setPaymentMethod] = useState("");
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -16,7 +22,7 @@ export default function Projects() {
                 });
                 setProjects(data);
             } catch (err) {
-                console.error("Error fetching projects:", err);
+                console.error(err);
                 toast.error("Failed to fetch projects");
             } finally {
                 setLoading(false);
@@ -25,18 +31,48 @@ export default function Projects() {
         fetchProjects();
     }, []);
 
-    const handleEnquire = (project) => {
-        // Navigate or open enquiry form
-        toast.success(`Enquiry for "${project.name}" clicked!`);
-    };
-
+    // Step 1: User selects Buy → choose EMI plan
     const handleBuy = (project) => {
         setSelectedProject(project);
+        setSelectedPlan(0);
+        setPaymentMethod("");
     };
 
-    const handleEMISelect = (amount) => {
-        toast.success(`You selected EMI plan: ₹${amount} per month`);
-        setSelectedProject(null); // close modal
+    // Step 2: User selects EMI plan → show payment details
+    const handlePlanSelect = (amount) => {
+        setSelectedPlan(amount);
+    };
+
+    // Step 3: Make initial payment
+    const handlePayment = async () => {
+        if (!selectedPlan || !paymentMethod) {
+            toast.error("Select EMI plan and payment method");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const { data } = await API.post(
+                "/payments",
+                {
+                    projectId: selectedProject._id,
+                    plan: `${selectedPlan}/month`,
+                    paidAmount: selectedPlan,
+                    paymentMethod,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            toast.success(`Payment successful! ₹${selectedPlan} paid`);
+            // Close modal & reset state
+            setSelectedProject(null);
+            setSelectedPlan(0);
+            setPaymentMethod("");
+        } catch (err) {
+            console.error(err);
+            toast.error("Payment failed");
+        }
     };
 
     if (loading) return <p className="text-center mt-10">Loading projects...</p>;
@@ -54,33 +90,28 @@ export default function Projects() {
                             key={project._id}
                             className="p-4 border rounded-xl shadow-lg hover:shadow-xl transition relative"
                         >
-                            <img
-                                src={project.image}
-                                alt={project.name}
-                                className="w-full h-48 object-cover mb-4 rounded"
-                            />
+                            {project.image && (
+                                <img
+                                    src={project.image}
+                                    alt={project.name}
+                                    className="w-full h-48 object-cover mb-4 rounded"
+                                />
+                            )}
                             <h3 className="text-xl font-bold mb-1">{project.name}</h3>
                             <p><strong>Area:</strong> {project.area}</p>
                             <p><strong>Status:</strong> {project.status}</p>
-
-                            <p className="mt-4">
-                                <strong>Price:</strong> {project.
-                                    priceRange}
-                            </p>
-                          
-                            <p className="mt-4">
-                                <strong>Location:</strong>{" "}
+                            <p className="mt-4"><strong>Price:</strong> {project.priceRange}</p>
+                            <p className="mt-2">
                                 <a
                                     href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(project.location)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline"
+                                    className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1"
                                 >
-                                    {project.location}
+                                    <FaMapMarkerAlt size={20} /> Location
                                 </a>
                             </p>
 
-                            {/* Buttons */}
                             <div className="flex gap-3 mt-4">
                                 <Link to="/customer/enquery" className="flex-1">
                                     <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
@@ -99,8 +130,8 @@ export default function Projects() {
                 </div>
             )}
 
-            {/* EMI Modal */}
-            {selectedProject && (
+            {/* EMI Plan Modal */}
+            {selectedProject && !selectedPlan && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-80">
                         <h2 className="text-xl font-bold mb-4">Select EMI Plan</h2>
@@ -109,7 +140,7 @@ export default function Projects() {
                             {[5000, 10000, 20000, 50000].map((amount) => (
                                 <button
                                     key={amount}
-                                    onClick={() => handleEMISelect(amount)}
+                                    onClick={() => handlePlanSelect(amount)}
                                     className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
                                 >
                                     ₹{amount} / month
@@ -119,6 +150,41 @@ export default function Projects() {
                         <button
                             onClick={() => setSelectedProject(null)}
                             className="mt-4 w-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Payment Details Modal */}
+            {selectedProject && selectedPlan > 0 && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-80">
+                        <h2 className="text-xl font-bold mb-4">Enter Payment Details</h2>
+                        <p className="mb-2">Project: <strong>{selectedProject.name}</strong></p>
+                        <p className="mb-2">EMI Plan: <strong>₹{selectedPlan}/month</strong></p>
+
+                        <select
+                            className="w-full p-2 rounded mb-3"
+                            value={paymentMethod}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                        >
+                            <option value="">Select Payment Method</option>
+                            <option value="card">Card</option>
+                            <option value="upi">UPI</option>
+                        </select>
+
+                        <button
+                            onClick={handlePayment}
+                            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+                        >
+                            Pay ₹{selectedPlan}
+                        </button>
+
+                        <button
+                            onClick={() => setSelectedProject(null)}
+                            className="mt-3 w-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition"
                         >
                             Cancel
                         </button>
